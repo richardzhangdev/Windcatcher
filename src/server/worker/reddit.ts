@@ -1,10 +1,10 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const CUTOFF_DAYS = 30;
 const MAX_PER_SOURCE = 30;
 
-function cutoffToRedditT(days: number): string {
+function sinceToRedditT(since: Date): string {
+  const days = (Date.now() - since.getTime()) / 86_400_000;
   if (days <= 1) return "day";
   if (days <= 7) return "week";
   if (days <= 30) return "month";
@@ -12,10 +12,9 @@ function cutoffToRedditT(days: number): string {
   return "all";
 }
 
-export async function fetchReddit(keywords: string[]): Promise<Item[]> {
+export async function fetchReddit(keywords: string[], since: Date): Promise<Item[]> {
   const results: Item[] = [];
-  const t = cutoffToRedditT(CUTOFF_DAYS);
-  const cutoff = new Date(Date.now() - CUTOFF_DAYS * 86_400_000);
+  const t = sinceToRedditT(since);
   const q = encodeURIComponent(keywords.join(" OR "));
   let after: string | null = null;
   let page = 0;
@@ -34,7 +33,7 @@ export async function fetchReddit(keywords: string[]): Promise<Item[]> {
       for (const child of children) {
         const d = child.data ?? {};
         const ts = new Date(d.created_utc * 1000);
-        if (ts < cutoff) continue;
+        if (ts < since) continue;
         let thumbnail: string | undefined;
         const rawThumb: string = d.thumbnail ?? "";
         if (rawThumb && rawThumb.startsWith("http")) {

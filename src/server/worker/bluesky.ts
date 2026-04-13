@@ -1,7 +1,6 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const CUTOFF_DAYS = 30;
 const MAX_PER_SOURCE = 30;
 
 async function getBskyToken(handle: string, appPassword: string): Promise<string> {
@@ -25,7 +24,8 @@ function hashStr(s: string): number {
 export async function fetchBluesky(
   keywords: string[],
   handle: string,
-  appPassword: string
+  appPassword: string,
+  since: Date
 ): Promise<Item[]> {
   if (!handle || !appPassword) {
     log("Bluesky: no credentials configured, skipping");
@@ -41,8 +41,7 @@ export async function fetchBluesky(
   }
 
   const results: Item[] = [];
-  const cutoff = new Date(Date.now() - CUTOFF_DAYS * 86_400_000);
-  const since = encodeURIComponent(cutoff.toISOString().replace(/\.\d+Z$/, "Z"));
+  const sinceParam = encodeURIComponent(since.toISOString().replace(/\.\d+Z$/, "Z"));
   const seen = new Set<string>();
 
   for (const kw of keywords) {
@@ -54,7 +53,7 @@ export async function fetchBluesky(
     while (page < 3) {
       let url =
         `https://bsky.social/xrpc/app.bsky.feed.searchPosts` +
-        `?q=${q}&limit=25&sort=latest&since=${since}`;
+        `?q=${q}&limit=25&sort=latest&since=${sinceParam}`;
       if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
       try {
         const raw = await fetchUrl(url, {
@@ -105,7 +104,6 @@ export async function fetchBluesky(
             timestamp: ts,
             engagement: {
               likes: post.likeCount ?? 0,
-              retweets: post.repostCount ?? 0,
               upvotes: 0,
               comments: post.replyCount ?? 0,
               points: 0,

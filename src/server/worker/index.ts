@@ -6,7 +6,7 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { dirname } from "path";
-import { Item } from "../../shared/types.js";
+import { Item, ResultsFile } from "../../shared/types.js";
 import { MEMORY_FILE } from "../paths.js";
 import { loadConfig } from "../config.js";
 import { log } from "./utils.js";
@@ -55,16 +55,21 @@ async function main() {
   const { sources, keywords, custom_feeds } = cfg;
 
   let existing: Item[] = [];
+  let lastUpdated: Date | null = null;
   if (existsSync(MEMORY_FILE)) {
     try {
-      existing = (
-        JSON.parse(readFileSync(MEMORY_FILE, "utf8")) as { items: Item[] }
-      ).items;
-      log(`Loaded ${existing.length} existing items`);
+      const stored = JSON.parse(readFileSync(MEMORY_FILE, "utf8")) as ResultsFile;
+      existing = stored.items;
+      if (stored.last_updated) lastUpdated = new Date(stored.last_updated);
+      log(`Loaded ${existing.length} existing items (last updated: ${stored.last_updated ?? "never"})`);
     } catch (e) {
       log(`Could not load existing results: ${e}`);
     }
   }
+
+  const cutoffFloor = new Date(Date.now() - CUTOFF_DAYS * 86_400_000);
+  const since = lastUpdated && lastUpdated > cutoffFloor ? lastUpdated : cutoffFloor;
+  log(`Fetching items since: ${since.toISOString()}`);
 
   log(`Keywords: ${JSON.stringify(keywords)}`);
   const disabledSources = Object.entries(sources)
@@ -75,45 +80,45 @@ async function main() {
   const newItems: Item[] = [];
 
   if (sourceEnabled(sources, "hackernews")) {
-    newItems.push(...(await fetchHN(keywords)));
+    newItems.push(...(await fetchHN(keywords, since)));
   } else {
     log("HN: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "news")) {
-    newItems.push(...(await fetchGoogleNews()));
+    newItems.push(...(await fetchGoogleNews(since)));
   } else {
     log("Google News: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "reddit")) {
-    newItems.push(...(await fetchReddit(keywords)));
+    newItems.push(...(await fetchReddit(keywords, since)));
   } else {
     log("Reddit: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "twitter", false)) {
-    newItems.push(...(await fetchTwitter(keywords, cfg.twitter_bearer_token)));
+    newItems.push(...(await fetchTwitter(keywords, cfg.twitter_bearer_token, since)));
   } else {
     log("Twitter: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "youtube", false)) {
-    newItems.push(...(await fetchYouTube(keywords, cfg.youtube_api_key)));
+    newItems.push(...(await fetchYouTube(keywords, cfg.youtube_api_key, since)));
   } else {
     log("YouTube: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "bluesky", false)) {
     newItems.push(
-      ...(await fetchBluesky(keywords, cfg.bluesky_handle, cfg.bluesky_app_password))
+      ...(await fetchBluesky(keywords, cfg.bluesky_handle, cfg.bluesky_app_password, since))
     );
   } else {
     log("Bluesky: skipped (disabled in config)");
   }
 
   if (custom_feeds.length) {
-    newItems.push(...(await fetchCustomFeeds(custom_feeds, CUTOFF_DAYS)));
+    newItems.push(...(await fetchCustomFeeds(custom_feeds, since)));
   }
 
   log(`Fetched ${newItems.length} new items across all sources`);

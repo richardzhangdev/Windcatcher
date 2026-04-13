@@ -1,19 +1,22 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const CUTOFF_DAYS = 30;
 const MAX_PER_SOURCE = 30;
+// Twitter free tier limits search to the past 7 days
+const TWITTER_MAX_DAYS = 7;
 
 export async function fetchTwitter(
   keywords: string[],
-  bearerToken: string
+  bearerToken: string,
+  since: Date
 ): Promise<Item[]> {
   if (!bearerToken) {
     log("Twitter: no Bearer Token configured, skipping");
     return [];
   }
   const results: Item[] = [];
-  const cutoff = new Date(Date.now() - Math.min(CUTOFF_DAYS, 7) * 86_400_000);
+  const twitterFloor = new Date(Date.now() - TWITTER_MAX_DAYS * 86_400_000);
+  const effectiveSince = since > twitterFloor ? since : twitterFloor;
   const twTerms = keywords.map((kw) => kw.replace(/^"|"$/g, "")).join(" OR ");
   const query = `(${twTerms}) -is:retweet`;
 
@@ -24,7 +27,7 @@ export async function fetchTwitter(
     expansions: "author_id,attachments.media_keys",
     "user.fields": "username,name",
     "media.fields": "url,preview_image_url,type",
-    start_time: cutoff.toISOString().replace(/\.\d+Z$/, "Z"),
+    start_time: effectiveSince.toISOString().replace(/\.\d+Z$/, "Z"),
   });
 
   let page = 0;

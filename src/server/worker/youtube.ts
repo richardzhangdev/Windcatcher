@@ -1,20 +1,19 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const CUTOFF_DAYS = 30;
 const MAX_PER_SOURCE = 30;
 
 export async function fetchYouTube(
   keywords: string[],
-  apiKey: string
+  apiKey: string,
+  since: Date
 ): Promise<Item[]> {
   if (!apiKey) {
     log("YouTube: no API key configured, skipping");
     return [];
   }
   const results: Item[] = [];
-  const cutoff = new Date(Date.now() - CUTOFF_DAYS * 86_400_000);
-  const publishedAfter = cutoff.toISOString().replace(/\.\d+Z$/, "Z");
+  const publishedAfter = since.toISOString().replace(/\.\d+Z$/, "Z");
   const seen = new Set<string>();
 
   for (const kw of keywords) {

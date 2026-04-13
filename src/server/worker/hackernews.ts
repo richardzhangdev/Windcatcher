@@ -1,13 +1,12 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const CUTOFF_DAYS = 30;
 const MAX_PER_SOURCE = 30;
 
-export async function fetchHN(keywords: string[]): Promise<Item[]> {
+export async function fetchHN(keywords: string[], since: Date): Promise<Item[]> {
   const results: Item[] = [];
   const q = encodeURIComponent(keywords.join(" OR "));
-  const cutoffTs = Math.floor((Date.now() - CUTOFF_DAYS * 86_400_000) / 1000);
+  const cutoffTs = Math.floor(since.getTime() / 1000);
   const numeric = encodeURIComponent(`created_at_i>${cutoffTs}`);
 
   for (const tag of ["story", "comment"] as const) {

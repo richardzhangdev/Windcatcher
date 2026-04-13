@@ -1,6 +1,5 @@
 export interface Engagement {
   likes: number;
-  retweets: number;
   upvotes: number;
   comments: number;
   points: number;

@@ -21,7 +21,7 @@ interface RssItem {
   source?: string | { "#text"?: string };
 }
 
-export async function fetchGoogleNews(): Promise<Item[]> {
+export async function fetchGoogleNews(since: Date): Promise<Item[]> {
   const results: Item[] = [];
   const seen = new Set<string>();
   const parser = new XMLParser({ ignoreAttributes: false });
@@ -37,6 +37,8 @@ export async function fetchGoogleNews(): Promise<Item[]> {
         const link = item.link ?? "";
         if (!link || seen.has(link)) continue;
         seen.add(link);
+        const pubTs = parseRfc2822(item.pubDate ?? "");
+        if (pubTs && new Date(pubTs) < since) continue;
         const sourceVal = item.source;
         const sourceName =
           typeof sourceVal === "string"
@@ -51,7 +53,7 @@ export async function fetchGoogleNews(): Promise<Item[]> {
           url: link,
           author: sourceName,
           subreddit: "",
-          timestamp: parseRfc2822(item.pubDate ?? ""),
+          timestamp: pubTs,
           engagement: { likes: 0, retweets: 0, upvotes: 0, comments: 0, points: 0 },
         });
         if (results.length >= MAX_PER_SOURCE) break;
@@ -66,10 +68,9 @@ export async function fetchGoogleNews(): Promise<Item[]> {
 
 export async function fetchCustomFeeds(
   feeds: { id: string; label: string; url: string; enabled?: boolean }[],
-  cutoffDays: number
+  since: Date
 ): Promise<Item[]> {
   const results: Item[] = [];
-  const cutoff = new Date(Date.now() - cutoffDays * 86_400_000);
   const parser = new XMLParser({ ignoreAttributes: false });
 
   for (const feed of feeds) {
@@ -87,7 +88,7 @@ export async function fetchCustomFeeds(
         const link = item.link ?? "";
         const pub = item.pubDate ?? "";
         const ts = parseRfc2822(pub);
-        if (ts && new Date(ts) < cutoff) continue;
+        if (ts && new Date(ts) < since) continue;
         results.push({
           id: `${srcKey}-${Math.abs(hashStr(link)) % 1_000_000_000}`,
           source: srcKey,
