@@ -249,7 +249,7 @@ select:focus { outline: none; border-color: var(--accent); }
   padding: 10px 14px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   transition: background .08s;
   cursor: pointer;
   border-bottom: 1px solid var(--bdr);
@@ -272,6 +272,66 @@ select:focus { outline: none; border-color: var(--accent); }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ── Card thumbnail ── */
+.card-thumb-wrap {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  margin: 2px 0;
+}
+.card-thumb {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  max-height: 180px;
+}
+.card-thumb-video .card-thumb {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  max-height: none;
+}
+.card-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+  background: rgba(0, 0, 0, .3);
+  opacity: 0;
+  transition: opacity .12s;
+  pointer-events: none;
+}
+.card:hover .card-play { opacity: 1; }
+
+/* ── Card body text (tweets / bluesky) ── */
+.card-body-text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--tx);
+  white-space: pre-wrap;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+/* ── Card snippet (description / selftext) ── */
+.card-snippet {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--tx-secondary);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
 }
 
 /* ── Ghost column ── */

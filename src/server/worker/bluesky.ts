@@ -78,6 +78,21 @@ export async function fetchBluesky(
               ? `https://bsky.app/profile/${postHandle}/post/${rkey}`
               : "";
           if (!postUrl) continue;
+          let thumbnail: string | undefined;
+          const embed = post.embed;
+          if (embed) {
+            const images: any[] = embed.images ?? embed.media?.images ?? [];
+            if (images.length) {
+              thumbnail = images[0].thumb ?? images[0].fullsize;
+            }
+            if (!thumbnail && embed.thumbnail) {
+              thumbnail = embed.thumbnail;
+            }
+            if (!thumbnail && embed.external?.thumb) {
+              thumbnail = embed.external.thumb;
+            }
+          }
+
           results.push({
             id: `bsky-${Math.abs(hashStr(uri)) % 1_000_000_000_000}`,
             source: "bluesky",
@@ -95,6 +110,7 @@ export async function fetchBluesky(
               comments: post.replyCount ?? 0,
               points: 0,
             },
+            thumbnail,
           });
         }
         log(`Bluesky '${kwClean}' page ${page + 1}: ${posts.length} posts`);

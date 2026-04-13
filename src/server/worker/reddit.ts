@@ -35,12 +35,23 @@ export async function fetchReddit(keywords: string[]): Promise<Item[]> {
         const d = child.data ?? {};
         const ts = new Date(d.created_utc * 1000);
         if (ts < cutoff) continue;
+        let thumbnail: string | undefined;
+        const rawThumb: string = d.thumbnail ?? "";
+        if (rawThumb && rawThumb.startsWith("http")) {
+          thumbnail = rawThumb;
+        }
+        const previewUrl: string =
+          d.preview?.images?.[0]?.source?.url ?? "";
+        if (previewUrl) {
+          thumbnail = previewUrl.replace(/&amp;/g, "&");
+        }
+
         results.push({
           id: `rd-${d.id ?? ""}`,
           source: "reddit",
           type: "post",
           title: d.title ?? "",
-          text: "",
+          text: (d.selftext ?? "").slice(0, 200),
           url: `https://reddit.com${d.permalink ?? ""}`,
           author: `u/${d.author ?? ""}`,
           subreddit: `r/${d.subreddit ?? ""}`,
@@ -52,6 +63,7 @@ export async function fetchReddit(keywords: string[]): Promise<Item[]> {
             comments: d.num_comments ?? 0,
             points: 0,
           },
+          thumbnail,
         });
       }
       log(`Reddit page ${page + 1}: ${children.length} posts fetched, ${results.length} kept`);

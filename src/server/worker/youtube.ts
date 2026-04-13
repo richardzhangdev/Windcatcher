@@ -40,6 +40,10 @@ export async function fetchYouTube(
         const snippet = item.snippet ?? {};
         const published: string = snippet.publishedAt ?? "";
         const ts = published ? new Date(published).toISOString() : published;
+        const thumb =
+          snippet.thumbnails?.medium?.url ??
+          snippet.thumbnails?.default?.url ??
+          `https://img.youtube.com/vi/${vidId}/mqdefault.jpg`;
         results.push({
           id: `yt-${vidId}`,
           source: "youtube",
@@ -51,6 +55,7 @@ export async function fetchYouTube(
           subreddit: "",
           timestamp: ts,
           engagement: { likes: 0, retweets: 0, upvotes: 0, comments: 0, points: 0 },
+          thumbnail: thumb,
         });
       }
       log(`YouTube '${kwClean}': ${items.length} results`);

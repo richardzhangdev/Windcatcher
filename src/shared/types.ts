@@ -17,6 +17,7 @@ export interface Item {
   subreddit: string;
   timestamp: string;
   engagement: Engagement;
+  thumbnail?: string;
 }
 
 export interface ResultsFile {

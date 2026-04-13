@@ -20,9 +20,10 @@ export async function fetchTwitter(
   const baseParams = new URLSearchParams({
     query,
     max_results: String(MAX_PER_SOURCE),
-    "tweet.fields": "created_at,public_metrics,author_id",
-    expansions: "author_id",
+    "tweet.fields": "created_at,public_metrics,author_id,attachments",
+    expansions: "author_id,attachments.media_keys",
     "user.fields": "username,name",
+    "media.fields": "url,preview_image_url,type",
     start_time: cutoff.toISOString().replace(/\.\d+Z$/, "Z"),
   });
 
@@ -45,6 +46,8 @@ export async function fetchTwitter(
       const tweets: any[] = data.data ?? [];
       const users: Record<string, any> = {};
       for (const u of data?.includes?.users ?? []) users[u.id] = u;
+      const mediaMap: Record<string, any> = {};
+      for (const m of data?.includes?.media ?? []) mediaMap[m.media_key] = m;
 
       for (const t of tweets) {
         const tid: string = t.id;
@@ -55,6 +58,17 @@ export async function fetchTwitter(
         const tweetUrl = username
           ? `https://x.com/${username}/status/${tid}`
           : `https://x.com/i/web/status/${tid}`;
+
+        let thumbnail: string | undefined;
+        const mediaKeys: string[] = t.attachments?.media_keys ?? [];
+        for (const mk of mediaKeys) {
+          const media = mediaMap[mk];
+          if (media) {
+            thumbnail = media.url ?? media.preview_image_url;
+            if (thumbnail) break;
+          }
+        }
+
         results.push({
           id: `tw-${tid}`,
           source: "twitter",
@@ -72,6 +86,7 @@ export async function fetchTwitter(
             comments: 0,
             points: 0,
           },
+          thumbnail,
         });
       }
       log(`Twitter API page ${page + 1}: ${tweets.length} tweets`);
