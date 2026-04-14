@@ -24,11 +24,11 @@ export function LogPanel({ lines, status, onClose }: LogPanelProps) {
 
   return (
     <div className="log-panel">
+      <pre className="log-out" ref={outRef}>{lines.join("")}</pre>
       <div className="log-hd">
         <span className={`log-status ${status}`}>{STATUS_TEXT[status]}</span>
         <button className="log-close" onClick={onClose}>✕ dismiss</button>
       </div>
-      <pre className="log-out" ref={outRef}>{lines.join("")}</pre>
     </div>
   );
 }

@@ -69,7 +69,7 @@ export const BUILTIN_SOURCES: BuiltinSource[] = [
   { id: "bluesky",    icon: "Bluesky_Logo.svg",              label: "Bluesky",      color: "#0085ff" },
 ];
 
-export const DEFAULT_SOURCE_ORDER = BUILTIN_SOURCES.map((s) => s.id);
+export const DEFAULT_SOURCE_ORDER = ["twitter", "reddit", "youtube", "news", "bluesky", "hackernews"];
 
 export const DEFAULT_CONFIG: AppConfig = {
   sources: {

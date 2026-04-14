@@ -118,6 +118,7 @@ export function App() {
       setTimeout(() => {
         loadData(days);
         setLogStatus("idle");
+        setShowLog(false);
       }, 1200);
     } catch (e: any) {
       if (e.name !== "AbortError") {
