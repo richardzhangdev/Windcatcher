@@ -1,9 +1,7 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const MAX_PER_SOURCE = 30;
-
-export async function fetchHN(keywords: string[], since: Date): Promise<Item[]> {
+export async function fetchHN(keywords: string[], since: Date, maxResults = 30): Promise<Item[]> {
   const results: Item[] = [];
   const q = encodeURIComponent(keywords.join(" OR "));
   const cutoffTs = Math.floor(since.getTime() / 1000);
@@ -41,7 +39,6 @@ export async function fetchHN(keywords: string[], since: Date): Promise<Item[]> 
             timestamp: hit.created_at ?? "",
             engagement: {
               likes: 0,
-              retweets: 0,
               upvotes: 0,
               comments: hit.num_comments ?? 0,
               points: hit.points ?? 0,
@@ -50,7 +47,7 @@ export async function fetchHN(keywords: string[], since: Date): Promise<Item[]> 
         }
         const nbPages: number = data.nbPages ?? 1;
         log(`HN ${tag}s page ${page + 1}/${nbPages}: ${hits.length} results`);
-        if (results.length >= MAX_PER_SOURCE || page + 1 >= nbPages || page >= 4) break;
+        if (results.length >= maxResults || page + 1 >= nbPages || page >= 4) break;
         page++;
       } catch (e) {
         log(`HN ${tag} error (page ${page}): ${e}`);

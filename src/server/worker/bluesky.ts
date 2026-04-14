@@ -1,8 +1,6 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const MAX_PER_SOURCE = 30;
-
 async function getBskyToken(handle: string, appPassword: string): Promise<string> {
   const body = JSON.stringify({ identifier: handle, password: appPassword });
   const raw = await fetchUrl("https://bsky.social/xrpc/com.atproto.server.createSession", {
@@ -25,7 +23,8 @@ export async function fetchBluesky(
   keywords: string[],
   handle: string,
   appPassword: string,
-  since: Date
+  since: Date,
+  maxResults = 30
 ): Promise<Item[]> {
   if (!handle || !appPassword) {
     log("Bluesky: no credentials configured, skipping");
@@ -112,7 +111,7 @@ export async function fetchBluesky(
           });
         }
         log(`Bluesky '${kwClean}' page ${page + 1}: ${posts.length} posts`);
-        if (results.length >= MAX_PER_SOURCE) break;
+        if (results.length >= maxResults) break;
         cursor = data.cursor ?? null;
         if (!cursor) break;
         page++;
@@ -123,5 +122,5 @@ export async function fetchBluesky(
     }
   }
   log(`Bluesky: ${results.length} total`);
-  return results.slice(0, MAX_PER_SOURCE);
+  return results.slice(0, maxResults);
 }

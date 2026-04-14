@@ -3,6 +3,7 @@ import { AppConfig, Item, BUILTIN_SOURCES, ResultsFile, StatusResponse, DEFAULT_
 import { Column } from "./components/Column";
 import { LogPanel } from "./components/LogPanel";
 import { AddSourcePopup } from "./components/AddSourcePopup";
+import { SettingsPopup } from "./components/SettingsPopup";
 import { formatLastUpdated } from "./utils";
 
 const DAYS_OPTIONS = [
@@ -41,6 +42,7 @@ export function App() {
   const [logStatus, setLogStatus] = useState<"idle" | "run" | "done" | "err">("idle");
   const [showLog, setShowLog] = useState(false);
   const [showAddPopup, setShowAddPopup] = useState(false);
+  const [showSettingsPopup, setShowSettingsPopup] = useState(false);
 
   const [dragSourceId, setDragSourceId] = useState<string | null>(null);
   const [liveOrder, setLiveOrder] = useState<string[] | null>(null);
@@ -187,6 +189,22 @@ export function App() {
     persistConfig({ ...config, source_order: liveOrder });
   }
 
+  async function handleClearCache() {
+    try {
+      const res = await fetch("/api/clear-cache", { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(`Failed to clear cache: ${data.error || "Unknown error"}`);
+        return;
+      }
+      const data = await res.json();
+      alert(data.message || "Cache cleared successfully");
+      loadData(days);
+    } catch (e) {
+      alert(`Error clearing cache: ${e}`);
+    }
+  }
+
   const displayConfig = config && liveOrder ? { ...config, source_order: liveOrder } : config;
   const enabledSources = displayConfig ? getOrderedSources(displayConfig) : [];
   const hasDisabled = config
@@ -225,6 +243,13 @@ export function App() {
             disabled={refreshing}
           >
             {refreshing ? "Refreshing..." : "Refresh"}
+          </button>
+          <button
+            className="btn"
+            onClick={() => setShowSettingsPopup(true)}
+            style={{ marginLeft: "8px" }}
+          >
+            ⚙️ Settings
           </button>
         </div>
       </header>
@@ -265,12 +290,21 @@ export function App() {
       </div>
 
       {config && (
-        <AddSourcePopup
-          open={showAddPopup}
-          config={config}
-          onClose={() => setShowAddPopup(false)}
-          onAdd={addSource}
-        />
+        <>
+          <AddSourcePopup
+            open={showAddPopup}
+            config={config}
+            onClose={() => setShowAddPopup(false)}
+            onAdd={addSource}
+          />
+          <SettingsPopup
+            open={showSettingsPopup}
+            config={config}
+            onClose={() => setShowSettingsPopup(false)}
+            onSave={persistConfig}
+            onClearCache={handleClearCache}
+          />
+        </>
       )}
     </>
   );

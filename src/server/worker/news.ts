@@ -2,8 +2,6 @@ import { XMLParser } from "fast-xml-parser";
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const MAX_PER_SOURCE = 30;
-
 function parseRfc2822(dateStr: string): string {
   try {
     const d = new Date(dateStr);
@@ -21,7 +19,7 @@ interface RssItem {
   source?: string | { "#text"?: string };
 }
 
-export async function fetchGoogleNews(since: Date): Promise<Item[]> {
+export async function fetchGoogleNews(since: Date, maxResults = 30): Promise<Item[]> {
   const results: Item[] = [];
   const seen = new Set<string>();
   const parser = new XMLParser({ ignoreAttributes: false });
@@ -54,9 +52,9 @@ export async function fetchGoogleNews(since: Date): Promise<Item[]> {
           author: sourceName,
           subreddit: "",
           timestamp: pubTs,
-          engagement: { likes: 0, retweets: 0, upvotes: 0, comments: 0, points: 0 },
+          engagement: { likes: 0, upvotes: 0, comments: 0, points: 0 },
         });
-        if (results.length >= MAX_PER_SOURCE) break;
+        if (results.length >= maxResults) break;
       }
     } catch (e) {
       log(`Google News fetch error (${q}): ${e}`);
@@ -99,7 +97,7 @@ export async function fetchCustomFeeds(
           author: label,
           subreddit: "",
           timestamp: ts,
-          engagement: { likes: 0, retweets: 0, upvotes: 0, comments: 0, points: 0 },
+          engagement: { likes: 0, upvotes: 0, comments: 0, points: 0 },
         });
         count++;
       }

@@ -22,10 +22,13 @@ export function engagementStr(item: Item): string {
   const e = item.engagement;
   const src = item.source;
   const parts: string[] = [];
-  if (src === "twitter" || src === "bluesky") {
+  if (src === "twitter") {
     if (e.likes) parts.push(`♥ ${e.likes.toLocaleString()}`);
-    if (e.retweets) parts.push(`↺ ${e.retweets.toLocaleString()}`);
-    if (src === "bluesky" && e.comments) parts.push(`💬 ${e.comments.toLocaleString()}`);
+    if (e.upvotes) parts.push(`↺ ${e.upvotes.toLocaleString()}`);
+    if (e.comments) parts.push(`💬 ${e.comments.toLocaleString()}`);
+  } else if (src === "bluesky") {
+    if (e.likes) parts.push(`♥ ${e.likes.toLocaleString()}`);
+    if (e.comments) parts.push(`💬 ${e.comments.toLocaleString()}`);
   } else if (src === "reddit") {
     if (e.upvotes) parts.push(`▲ ${e.upvotes.toLocaleString()}`);
     if (e.comments) parts.push(`💬 ${e.comments.toLocaleString()}`);

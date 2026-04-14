@@ -1,14 +1,14 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const MAX_PER_SOURCE = 30;
 // Twitter free tier limits search to the past 7 days
 const TWITTER_MAX_DAYS = 7;
 
 export async function fetchTwitter(
   keywords: string[],
   bearerToken: string,
-  since: Date
+  since: Date,
+  maxResults = 30
 ): Promise<Item[]> {
   if (!bearerToken) {
     log("Twitter: no Bearer Token configured, skipping");
@@ -22,7 +22,7 @@ export async function fetchTwitter(
 
   const baseParams = new URLSearchParams({
     query,
-    max_results: String(MAX_PER_SOURCE),
+    max_results: String(maxResults),
     "tweet.fields": "created_at,public_metrics,author_id,attachments",
     expansions: "author_id,attachments.media_keys",
     "user.fields": "username,name",
@@ -84,16 +84,15 @@ export async function fetchTwitter(
           timestamp: t.created_at ?? new Date().toISOString(),
           engagement: {
             likes: metrics.like_count ?? 0,
-            retweets: metrics.retweet_count ?? 0,
-            upvotes: 0,
-            comments: 0,
+            upvotes: metrics.retweet_count ?? 0,
+            comments: metrics.reply_count ?? 0,
             points: 0,
           },
           thumbnail,
         });
       }
       log(`Twitter API page ${page + 1}: ${tweets.length} tweets`);
-      if (results.length >= MAX_PER_SOURCE) break;
+      if (results.length >= maxResults) break;
       nextToken = data?.meta?.next_token ?? null;
       if (!nextToken || !tweets.length) break;
       page++;

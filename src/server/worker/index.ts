@@ -52,7 +52,7 @@ async function main() {
   log("IBM Bob Tracker starting...");
 
   const cfg = loadConfig();
-  const { sources, keywords, custom_feeds } = cfg;
+  const { sources, keywords, custom_feeds, max_results_per_source } = cfg;
 
   let existing: Item[] = [];
   let lastUpdated: Date | null = null;
@@ -80,38 +80,38 @@ async function main() {
   const newItems: Item[] = [];
 
   if (sourceEnabled(sources, "hackernews")) {
-    newItems.push(...(await fetchHN(keywords, since)));
+    newItems.push(...(await fetchHN(keywords, since, max_results_per_source)));
   } else {
     log("HN: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "news")) {
-    newItems.push(...(await fetchGoogleNews(since)));
+    newItems.push(...(await fetchGoogleNews(since, max_results_per_source)));
   } else {
     log("Google News: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "reddit")) {
-    newItems.push(...(await fetchReddit(keywords, since)));
+    newItems.push(...(await fetchReddit(keywords, since, max_results_per_source)));
   } else {
     log("Reddit: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "twitter", false)) {
-    newItems.push(...(await fetchTwitter(keywords, cfg.twitter_bearer_token, since)));
+    newItems.push(...(await fetchTwitter(keywords, cfg.twitter_bearer_token, since, max_results_per_source)));
   } else {
     log("Twitter: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "youtube", false)) {
-    newItems.push(...(await fetchYouTube(keywords, cfg.youtube_api_key, since)));
+    newItems.push(...(await fetchYouTube(keywords, cfg.youtube_api_key, since, max_results_per_source)));
   } else {
     log("YouTube: skipped (disabled in config)");
   }
 
   if (sourceEnabled(sources, "bluesky", false)) {
     newItems.push(
-      ...(await fetchBluesky(keywords, cfg.bluesky_handle, cfg.bluesky_app_password, since))
+      ...(await fetchBluesky(keywords, cfg.bluesky_handle, cfg.bluesky_app_password, since, max_results_per_source))
     );
   } else {
     log("Bluesky: skipped (disabled in config)");

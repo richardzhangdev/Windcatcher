@@ -52,6 +52,9 @@ function buildEnvFile(cfg: AppConfig): string {
     "",
     "# ── Column order (JSON array of source IDs) ──────────────────────────────────",
     `SOURCE_ORDER=${JSON.stringify(cfg.source_order)}`,
+    "",
+    "# ── Search settings ──────────────────────────────────────────────────────────",
+    `MAX_RESULTS_PER_SOURCE=${cfg.max_results_per_source}`,
   ];
   return lines.join("\n") + "\n";
 }
@@ -72,6 +75,7 @@ export function loadConfig(): AppConfig {
         youtube_api_key: legacy.youtube_api_key ?? "",
         bluesky_handle: legacy.bluesky_handle ?? "",
         bluesky_app_password: legacy.bluesky_app_password ?? "",
+        max_results_per_source: 30,
       };
       writeFileSync(ENV_FILE, buildEnvFile(migrated), "utf8");
       console.log(`[config] Migrated config.json → .env`);
@@ -107,6 +111,12 @@ export function loadConfig(): AppConfig {
     try { source_order = JSON.parse(env.SOURCE_ORDER); } catch { /* keep default */ }
   }
 
+  let max_results_per_source = 30;
+  if (env.MAX_RESULTS_PER_SOURCE) {
+    const parsed = parseInt(env.MAX_RESULTS_PER_SOURCE, 10);
+    if (!isNaN(parsed) && parsed > 0) max_results_per_source = parsed;
+  }
+
   return {
     sources,
     source_order,
@@ -116,6 +126,7 @@ export function loadConfig(): AppConfig {
     youtube_api_key: env.YOUTUBE_API_KEY ?? "",
     bluesky_handle: env.BLUESKY_HANDLE ?? "",
     bluesky_app_password: env.BLUESKY_APP_PASSWORD ?? "",
+    max_results_per_source,
   };
 }
 

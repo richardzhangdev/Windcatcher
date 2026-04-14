@@ -1,12 +1,11 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const MAX_PER_SOURCE = 30;
-
 export async function fetchYouTube(
   keywords: string[],
   apiKey: string,
-  since: Date
+  since: Date,
+  maxResults = 30
 ): Promise<Item[]> {
   if (!apiKey) {
     log("YouTube: no API key configured, skipping");
@@ -22,7 +21,7 @@ export async function fetchYouTube(
     const url =
       `https://www.googleapis.com/youtube/v3/search` +
       `?part=snippet&q=${q}&type=video&order=date` +
-      `&maxResults=${MAX_PER_SOURCE}` +
+      `&maxResults=${maxResults}` +
       `&publishedAfter=${encodeURIComponent(publishedAfter)}` +
       `&key=${apiKey}`;
     try {
@@ -53,7 +52,7 @@ export async function fetchYouTube(
           author: snippet.channelTitle ?? "",
           subreddit: "",
           timestamp: ts,
-          engagement: { likes: 0, retweets: 0, upvotes: 0, comments: 0, points: 0 },
+          engagement: { likes: 0, upvotes: 0, comments: 0, points: 0 },
           thumbnail: thumb,
         });
       }
@@ -64,5 +63,5 @@ export async function fetchYouTube(
     }
   }
   log(`YouTube: ${results.length} total`);
-  return results.slice(0, MAX_PER_SOURCE);
+  return results.slice(0, maxResults);
 }

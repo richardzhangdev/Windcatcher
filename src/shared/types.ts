@@ -50,6 +50,7 @@ export interface AppConfig {
   youtube_api_key: string;
   bluesky_handle: string;
   bluesky_app_password: string;
+  max_results_per_source: number;
 }
 
 export interface BuiltinSource {
@@ -86,6 +87,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   youtube_api_key:       "",
   bluesky_handle:        "",
   bluesky_app_password:  "",
+  max_results_per_source: 30,
 };
 
 export interface StatusResponse {

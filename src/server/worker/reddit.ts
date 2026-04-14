@@ -1,8 +1,6 @@
 import { Item } from "../../shared/types.js";
 import { log, fetchUrl } from "./utils.js";
 
-const MAX_PER_SOURCE = 30;
-
 function sinceToRedditT(since: Date): string {
   const days = (Date.now() - since.getTime()) / 86_400_000;
   if (days <= 1) return "day";
@@ -12,7 +10,7 @@ function sinceToRedditT(since: Date): string {
   return "all";
 }
 
-export async function fetchReddit(keywords: string[], since: Date): Promise<Item[]> {
+export async function fetchReddit(keywords: string[], since: Date, maxResults = 30): Promise<Item[]> {
   const results: Item[] = [];
   const t = sinceToRedditT(since);
   const q = encodeURIComponent(keywords.join(" OR "));
@@ -57,7 +55,6 @@ export async function fetchReddit(keywords: string[], since: Date): Promise<Item
           timestamp: ts.toISOString(),
           engagement: {
             likes: 0,
-            retweets: 0,
             upvotes: d.score ?? 0,
             comments: d.num_comments ?? 0,
             points: 0,
@@ -66,7 +63,7 @@ export async function fetchReddit(keywords: string[], since: Date): Promise<Item
         });
       }
       log(`Reddit page ${page + 1}: ${children.length} posts fetched, ${results.length} kept`);
-      if (results.length >= MAX_PER_SOURCE) break;
+      if (results.length >= maxResults) break;
       after = data?.data?.after ?? null;
       if (!after) break;
       page++;

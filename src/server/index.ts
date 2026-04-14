@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
 import { join } from "path";
-import { existsSync } from "fs";
+import { existsSync, unlinkSync } from "fs";
 import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { loadConfig, saveConfig } from "./config.js";
 import { loadResults } from "./data.js";
-import { ICONS_DIR, PORT, WINDCATCHER } from "./paths.js";
+import { ICONS_DIR, PORT, WINDCATCHER, MEMORY_FILE } from "./paths.js";
 import { AppConfig } from "../shared/types.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -97,6 +97,19 @@ app.post("/api/refresh", (req: Request, res: Response) => {
     res.write(`[error] ${err.message}\n`);
     res.end();
   });
+});
+
+app.post("/api/clear-cache", (_req: Request, res: Response) => {
+  try {
+    if (existsSync(MEMORY_FILE)) {
+      unlinkSync(MEMORY_FILE);
+      res.json({ ok: true, message: "Cache cleared successfully" });
+    } else {
+      res.json({ ok: true, message: "No cache to clear" });
+    }
+  } catch (e) {
+    res.status(500).json({ error: String(e) });
+  }
 });
 
 // ── Serve built frontend in production ───────────────────────────────────────
