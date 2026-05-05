@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Bob Aggregator — data collection worker
+ * IBM Bob News Tracker — data collection worker
  * Usage: npx tsx src/server/worker/index.ts
  */
 
@@ -49,7 +49,7 @@ function mergeItems(existing: Item[], fresh: Item[]): Item[] {
 }
 
 async function main() {
-  log("Bob Aggregator worker starting...");
+  log("IBM Bob Tracker starting...");
 
   const cfg = loadConfig();
   const { sources, keywords, custom_feeds, max_results_per_source } = cfg;

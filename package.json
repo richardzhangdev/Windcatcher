@@ -1,7 +1,7 @@
 {
-  "name": "bob-aggregator",
+  "name": "ibm-bob-tracker",
   "version": "2.0.0",
-  "description": "Bob Aggregator — React/TypeScript/Node",
+  "description": "IBM Bob News Tracker — React/TypeScript/Node",
   "type": "module",
   "scripts": {
     "dev": "concurrently -n vite,server -c cyan,yellow \"vite\" \"tsx watch src/server/index.ts\"",

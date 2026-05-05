@@ -17,7 +17,7 @@ export async function fetchUrl(
       ...options,
       signal: controller.signal,
       headers: {
-        "User-Agent": "bob-aggregator/2.0 (research tool; low-volume)",
+        "User-Agent": "ibm-bob-tracker/2.0 (research tool; low-volume)",
         Accept: "application/json, application/xml, text/xml, */*",
         ...((options.headers as Record<string, string>) ?? {}),
       },
