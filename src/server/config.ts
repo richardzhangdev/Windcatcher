@@ -27,7 +27,7 @@ function parseEnvFile(content: string): Record<string, string> {
 
 function buildEnvFile(cfg: AppConfig): string {
   const lines: string[] = [
-    "# IBM Bob Tracker — configuration",
+    "# Bob Aggregator — configuration",
     "# Edit here or use the Settings panel in the UI.",
     "",
     "# ── API credentials ─────────────────────────────────────────────────────────",

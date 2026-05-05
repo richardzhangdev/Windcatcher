@@ -229,7 +229,7 @@ export function App() {
     <>
       <header className="header">
         <div className="header-left">
-          <h1 className="header-title">Aggregated news on IBM Bob</h1>
+          <h1 className="header-title">Bob Aggregator</h1>
           <span className="header-upd">Updated {formatLastUpdated(lastUpdated)}</span>
         </div>
         <div className="header-right">

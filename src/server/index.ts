@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { loadConfig, saveConfig } from "./config.js";
 import { loadResults } from "./data.js";
-import { ICONS_DIR, PORT, WINDCATCHER, MEMORY_FILE } from "./paths.js";
+import { ICONS_DIR, PORT, BOB_AGGREGATOR_HOME, MEMORY_FILE } from "./paths.js";
 import { AppConfig } from "../shared/types.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -75,7 +75,7 @@ app.post("/api/refresh", (req: Request, res: Response) => {
   const workerPath = existsSync(workerTs) ? workerTs : workerJs;
 
   const proc = spawn("npx", ["tsx", workerPath], {
-    cwd: WINDCATCHER,
+    cwd: BOB_AGGREGATOR_HOME,
     stdio: ["ignore", "pipe", "pipe"],
   });
 
@@ -125,7 +125,7 @@ if (existsSync(distDir)) {
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 app.listen(PORT, "127.0.0.1", () => {
-  console.log(`IBM Bob Tracker API  →  http://localhost:${PORT}`);
+  console.log(`Bob Aggregator API   →  http://localhost:${PORT}`);
   if (existsSync(distDir)) {
     console.log(`Frontend             →  http://localhost:${PORT}`);
   } else {

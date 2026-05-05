@@ -23,7 +23,7 @@ export async function fetchReddit(keywords: string[], since: Date, maxResults = 
       if (after) url += `&after=${after}`;
       const data = JSON.parse(
         await fetchUrl(url, {
-          headers: { "User-Agent": "ibm-bob-tracker/2.0 (research; low-volume)" },
+          headers: { "User-Agent": "bob-aggregator/2.0 (research; low-volume)" },
         })
       );
       const children: any[] = data?.data?.children ?? [];
